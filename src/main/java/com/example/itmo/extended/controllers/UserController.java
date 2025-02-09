@@ -5,6 +5,7 @@ import com.example.itmo.extended.model.dto.response.UserInfoResponse;
 import com.example.itmo.extended.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 
@@ -26,7 +27,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public UserInfoResponse updateUser(@PathVariable Long id, @RequestBody UserInfoRequest request ) {
+    public UserInfoResponse updateUser(@PathVariable Long id, @RequestBody UserInfoRequest request) {
         return userService.updateUser(id, request);
     }
 

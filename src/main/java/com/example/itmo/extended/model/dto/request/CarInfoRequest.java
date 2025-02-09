@@ -2,10 +2,7 @@ package com.example.itmo.extended.model.dto.request;
 
 import com.example.itmo.extended.model.enums.CarType;
 import com.example.itmo.extended.model.enums.Color;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Getter
@@ -13,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class CarInfoRequest {
     private String brand;
     private String model;
