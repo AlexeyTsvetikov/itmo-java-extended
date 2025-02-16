@@ -39,4 +39,14 @@ public class CarController {
     public List<CarInfoResponse> getAllCars() {
         return carService.getAllCars();
     }
+    @GetMapping("/all/{userId}")
+    public List<CarInfoResponse> getAllCars(@PathVariable Long userId) {
+        return carService.getUserCars(userId);
+    }
+
+    @PostMapping("/linkUserAndDriver/{carId}/{userId}")
+    public CarInfoResponse linkUserAndDriver(@PathVariable Long carId, @PathVariable Long userId) {
+        return carService.linkCarAndDriver(carId, userId);
+    }
+
 }

@@ -4,13 +4,12 @@ import com.example.itmo.extended.model.enums.CarStatus;
 import com.example.itmo.extended.model.enums.CarType;
 import com.example.itmo.extended.model.enums.Color;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+
 
 @Getter
 @Setter
@@ -44,15 +43,11 @@ public class Car {
     @Enumerated(EnumType.STRING)
     private CarType type;
 
-    @CreationTimestamp
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private CarStatus status;
+
+    @ManyToOne
+    @JsonBackReference(value = "users_cars")
+    private User user;
 }
