@@ -18,6 +18,4 @@ public interface CarService {
     void deleteCar(Long id);
 
     List<CarInfoResponse> getAllCars();
-
-    CarInfoResponse getCar(String brand, String model);
 }

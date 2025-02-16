@@ -39,9 +39,4 @@ public class CarController {
     public List<CarInfoResponse> getAllCars() {
         return carService.getAllCars();
     }
-
-    @GetMapping
-    public CarInfoResponse getCarWithParams(@RequestParam(required = false) String brand, @RequestParam String model) {
-        return carService.getCar(brand, model);
-    }
 }
