@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PaginationUtils {
     public static Pageable getPageRequest(Integer page, Integer perPage, String sort, Sort.Direction order) {

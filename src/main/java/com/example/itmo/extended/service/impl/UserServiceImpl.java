@@ -86,7 +86,6 @@ public class UserServiceImpl implements UserService { // для межмодул
     public Page<UserInfoResponse> getAllUsers(Integer page, Integer perPage, String sort, Sort.Direction order, String filter) {
 
         Pageable pageRequest = PaginationUtils.getPageRequest(page, perPage, sort, order);
-
         Page<User> users;
 
         if (StringUtils.hasText(filter)) {
@@ -106,6 +105,5 @@ public class UserServiceImpl implements UserService { // для межмодул
     public User updateCarList(User updatedUser) {
         return userRepository.save(updatedUser);
     }
-
 
 }

@@ -4,6 +4,8 @@ import com.example.itmo.extended.model.dto.request.CarInfoRequest;
 import com.example.itmo.extended.model.dto.response.CarInfoResponse;
 import com.example.itmo.extended.service.CarService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,9 +38,14 @@ public class CarController {
     }
 
     @GetMapping("/all")
-    public List<CarInfoResponse> getAllCars() {
-        return carService.getAllCars();
+    public Page<CarInfoResponse> getAllCars(@RequestParam(defaultValue = "1") Integer page,
+                                            @RequestParam(defaultValue = "10") Integer perPage,
+                                            @RequestParam(defaultValue = "brand") String sort,
+                                            @RequestParam(defaultValue = "ASC") Sort.Direction order,
+                                            @RequestParam(required = false) String filter) {
+        return carService.getAllCars(page, perPage, sort, order, filter);
     }
+
     @GetMapping("/all/{userId}")
     public List<CarInfoResponse> getAllCars(@PathVariable Long userId) {
         return carService.getUserCars(userId);

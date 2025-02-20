@@ -41,9 +41,7 @@ public class UserController {
                                               @RequestParam(defaultValue = "10") Integer perPage,
                                               @RequestParam(defaultValue = "lastName") String sort,
                                               @RequestParam(defaultValue = "ASC") Sort.Direction order,
-                                              @RequestParam(required = false) String filter
-    ) {
+                                              @RequestParam(required = false) String filter) {
         return userService.getAllUsers(page, perPage, sort, order, filter);
     }
-
 }

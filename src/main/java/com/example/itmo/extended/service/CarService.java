@@ -7,10 +7,16 @@ import com.example.itmo.extended.model.dto.request.CarInfoRequest;
 import com.example.itmo.extended.model.dto.response.CarInfoResponse;
 import com.example.itmo.extended.model.dto.response.UserInfoResponse;
 import com.example.itmo.extended.model.enums.CarStatus;
+import com.example.itmo.extended.utils.PaginationUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +29,6 @@ public class CarService {
     private final ObjectMapper mapper;
     private final UserService userService;
     private final CarRepository carRepository;
-    private final ObjectMapper objectMapper;
 
     public CarInfoResponse addCar(CarInfoRequest request) {
         Car car = mapper.convertValue(request, Car.class);
@@ -49,7 +54,6 @@ public class CarService {
         if (carFromDB.getId() == null) {
             return mapper.convertValue(carFromDB, CarInfoResponse.class);
         }
-
         Car carReq = mapper.convertValue(request, Car.class);
 
         carFromDB.setBrand(carReq.getBrand() == null ? carFromDB.getBrand() : carReq.getBrand());
@@ -74,8 +78,33 @@ public class CarService {
         carRepository.save(carFromDB);
     }
 
-    public List<CarInfoResponse> getAllCars() {
-        return carRepository.findAll().stream()
+    public Page<CarInfoResponse> getAllCars(Integer page, Integer perPage, String sort, Sort.Direction order, String filter) {
+
+        Pageable pageRequest = PaginationUtils.getPageRequest(page, perPage, sort, order);
+        Page<Car> cars;
+
+        if (StringUtils.hasText(filter)) {
+            cars = carRepository.findAllFiltered(pageRequest, filter);
+        } else {
+            cars = carRepository.findAll(pageRequest);
+        }
+
+        List<CarInfoResponse> content = cars.getContent().stream()
+                .map(c -> mapper.convertValue(c, CarInfoResponse.class))
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(content, pageRequest, cars.getTotalElements());
+    }
+
+
+    public List<CarInfoResponse> getUserCars(Long userId) {
+        User user = userService.getUserFromDB(userId);
+        if (user.getId() == null) {
+            log.error("User with id {} not found", userId);
+            return List.of();
+        }
+        List<Car> userCars = user.getCars();
+        return userCars.stream()
                 .map(car -> mapper.convertValue(car, CarInfoResponse.class))
                 .collect(Collectors.toList());
     }
@@ -102,17 +131,11 @@ public class CarService {
         carFromDB.setUser(user);
         carRepository.save(carFromDB);
 
-        CarInfoResponse carInfoResponse = objectMapper.convertValue(carFromDB, CarInfoResponse.class);
-        UserInfoResponse userInfoResponse = objectMapper.convertValue(user, UserInfoResponse.class);
+        CarInfoResponse carInfoResponse = mapper.convertValue(carFromDB, CarInfoResponse.class);
+        UserInfoResponse userInfoResponse = mapper.convertValue(user, UserInfoResponse.class);
 
         carInfoResponse.setUser(userInfoResponse);
 
         return carInfoResponse;
-    }
-
-    public List<CarInfoResponse> getUserCars(Long userId) {
-        return carRepository.getUserCarsBrandNames(userId).stream()
-                .map(car -> objectMapper.convertValue(car, CarInfoResponse.class))
-                .collect(Collectors.toList());
     }
 }
