@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>itmo.124-20</artifactId>
+	<artifactId>itmo-java-extended</artifactId>
 	<version>1.0.0</version>
 	<name>itmo.124-20</name>
 	<description>Demo project for Spring Boot</description>
