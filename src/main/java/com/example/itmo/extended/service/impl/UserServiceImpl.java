@@ -1,5 +1,6 @@
 package com.example.itmo.extended.service.impl;
 
+import com.example.itmo.extended.exception.CommonBackendException;
 import com.example.itmo.extended.model.db.entity.User;
 import com.example.itmo.extended.model.db.repository.UserRepository;
 import com.example.itmo.extended.model.dto.request.UserInfoRequest;
@@ -10,10 +11,12 @@ import com.example.itmo.extended.utils.PaginationUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -31,6 +34,14 @@ public class UserServiceImpl implements UserService { // для межмодул
 
     @Override
     public UserInfoResponse addUser(UserInfoRequest request) {
+        if (!EmailValidator.getInstance().isValid(request.getEmail())) {
+            throw new CommonBackendException("Email invalid", HttpStatus.BAD_REQUEST);
+        }
+
+        userRepository.findByEmail(request.getEmail()).ifPresent(user -> {
+            throw new CommonBackendException("User already exists", HttpStatus.CONFLICT);
+        });
+
         User user = mapper.convertValue(request, User.class);
         user.setStatus(UserStatus.CREATED);
 
@@ -47,16 +58,13 @@ public class UserServiceImpl implements UserService { // для межмодул
     @Override
     public User getUserFromDB(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
-        return optionalUser.orElse(new User());
+        final String errMsg = String.format("User with id: %s not found", id);
+        return optionalUser.orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
     }
 
     @Override
     public UserInfoResponse updateUser(Long id, UserInfoRequest request) {
         User userFromDB = getUserFromDB(id);
-        if (userFromDB.getId() == null) {
-            return mapper.convertValue(userFromDB, UserInfoResponse.class);
-        }
-
         User userReq = mapper.convertValue(request, User.class);
 
         userFromDB.setEmail(userReq.getEmail() == null ? userFromDB.getEmail() : userReq.getEmail());
@@ -74,10 +82,6 @@ public class UserServiceImpl implements UserService { // для межмодул
     @Override
     public void deleteUser(Long id) {
         User userFromDB = getUserFromDB(id);
-        if (userFromDB.getId() == null) {
-            log.error("User with id {} not found", id);
-            return;
-        }
         userFromDB.setStatus(UserStatus.DELETED);
         userRepository.save(userFromDB);
     }
@@ -106,4 +110,11 @@ public class UserServiceImpl implements UserService { // для межмодул
         return userRepository.save(updatedUser);
     }
 
+    @Override
+    public void invalidateSessions() {
+        //logic
+
+        String email = UserInfoRequest.Fields.email;
+        String ade = UserInfoRequest.Fields.age;
+    }
 }

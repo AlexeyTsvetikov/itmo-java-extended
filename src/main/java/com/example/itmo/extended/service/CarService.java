@@ -1,5 +1,6 @@
 package com.example.itmo.extended.service;
 
+import com.example.itmo.extended.exception.CommonBackendException;
 import com.example.itmo.extended.model.db.entity.Car;
 import com.example.itmo.extended.model.db.entity.User;
 import com.example.itmo.extended.model.db.repository.CarRepository;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -31,6 +33,10 @@ public class CarService {
     private final CarRepository carRepository;
 
     public CarInfoResponse addCar(CarInfoRequest request) {
+        carRepository.findByModelAndYear(request.getModel(), request.getYear()).ifPresent(car -> {
+            throw new CommonBackendException("Car already exists", HttpStatus.CONFLICT);
+        });
+
         Car car = mapper.convertValue(request, Car.class);
         car.setStatus(CarStatus.CREATED);
 
@@ -45,15 +51,13 @@ public class CarService {
 
     public Car getCarFromDB(Long id) {
         Optional<Car> optionalCar = carRepository.findById(id);
-        return optionalCar.orElse(new Car());
+        final String errMsg = String.format("Car with id: %s not found", id);
+        return optionalCar.orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
     }
 
 
     public CarInfoResponse updateCar(Long id, CarInfoRequest request) {
         Car carFromDB = getCarFromDB(id);
-        if (carFromDB.getId() == null) {
-            return mapper.convertValue(carFromDB, CarInfoResponse.class);
-        }
         Car carReq = mapper.convertValue(request, Car.class);
 
         carFromDB.setBrand(carReq.getBrand() == null ? carFromDB.getBrand() : carReq.getBrand());
@@ -70,10 +74,6 @@ public class CarService {
 
     public void deleteCar(Long id) {
         Car carFromDB = getCarFromDB(id);
-        if (carFromDB.getId() == null) {
-            log.error("Car with id {} not found", id);
-            return;
-        }
         carFromDB.setStatus(CarStatus.DELETED);
         carRepository.save(carFromDB);
     }
@@ -99,10 +99,6 @@ public class CarService {
 
     public List<CarInfoResponse> getUserCars(Long userId) {
         User user = userService.getUserFromDB(userId);
-        if (user.getId() == null) {
-            log.error("User with id {} not found", userId);
-            return List.of();
-        }
         List<Car> userCars = user.getCars();
         return userCars.stream()
                 .map(car -> mapper.convertValue(car, CarInfoResponse.class))
@@ -112,10 +108,6 @@ public class CarService {
     public CarInfoResponse linkCarAndDriver(Long carId, Long userId) {
         Car carFromDB = getCarFromDB(carId);
         User userFromDB = userService.getUserFromDB(userId);
-
-        if (carFromDB.getId() == null || userFromDB.getId() == null) {
-            return CarInfoResponse.builder().build();
-        }
 
         List<Car> cars = userFromDB.getCars();
 
