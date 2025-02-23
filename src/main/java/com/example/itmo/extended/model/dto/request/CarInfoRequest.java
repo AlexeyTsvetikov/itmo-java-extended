@@ -2,6 +2,7 @@ package com.example.itmo.extended.model.dto.request;
 
 import com.example.itmo.extended.model.enums.CarType;
 import com.example.itmo.extended.model.enums.Color;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -14,7 +15,7 @@ import javax.validation.constraints.NotNull;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CarInfoRequest {
     @Schema(description = "Марка")
     private String brand;

@@ -59,7 +59,8 @@ public class UserServiceImpl implements UserService { // для межмодул
     public User getUserFromDB(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
         final String errMsg = String.format("User with id: %s not found", id);
-        return optionalUser.orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
+        return optionalUser
+                .orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
     }
 
     @Override
