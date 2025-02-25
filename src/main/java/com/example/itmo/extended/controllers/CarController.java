@@ -4,6 +4,8 @@ import com.example.itmo.extended.model.dto.request.CarInfoRequest;
 import com.example.itmo.extended.model.dto.response.CarInfoResponse;
 import com.example.itmo.extended.service.CarService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -11,9 +13,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
 @RestController
 @RequestMapping("/cars")
 @RequiredArgsConstructor
+@Tag(name = "Машины")
+@SecurityRequirement(name = AUTHORIZATION)
 public class CarController {
 
     private final CarService carService;

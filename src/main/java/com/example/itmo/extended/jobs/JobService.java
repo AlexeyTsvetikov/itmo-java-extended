@@ -18,7 +18,7 @@ public class JobService {
         userService.invalidateSessions();
     }
 
-    @Scheduled(fixedDelay = 3000)
+//    @Scheduled(fixedDelay = 3000)
     public void sendMsg(){
         String msg = "test" + counter++ + "@yandex.ru";
         log.info(msg);

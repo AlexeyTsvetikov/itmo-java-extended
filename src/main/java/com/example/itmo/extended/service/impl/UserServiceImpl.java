@@ -1,5 +1,6 @@
 package com.example.itmo.extended.service.impl;
 
+import com.example.itmo.extended.clients.RemoteClient;
 import com.example.itmo.extended.exception.CommonBackendException;
 import com.example.itmo.extended.model.db.entity.User;
 import com.example.itmo.extended.model.db.repository.UserRepository;
@@ -12,11 +13,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -25,12 +28,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.example.itmo.extended.config.secret.Constants.validateKey;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService { // для межмодульной архитектуры
     private final ObjectMapper mapper;
     private final UserRepository userRepository;
+
+    private final RemoteClient remoteClient;
+
+    @Value("#${app.base-url:itmo.ru}")
+    private String baseUrl;
 
     @Override
     public UserInfoResponse addUser(UserInfoRequest request) {
@@ -50,7 +60,8 @@ public class UserServiceImpl implements UserService { // для межмодул
     }
 
     @Override
-    public UserInfoResponse getUser(Long id) {
+    public UserInfoResponse getUser(String apiKey, Long id) {
+        validateKey(apiKey);
         User user = getUserFromDB(id);
         return mapper.convertValue(user, UserInfoResponse.class);
     }
@@ -117,5 +128,18 @@ public class UserServiceImpl implements UserService { // для межмодул
 
         String email = UserInfoRequest.Fields.email;
         String ade = UserInfoRequest.Fields.age;
+    }
+
+    @Override
+    public UserInfoResponse getYaUser(Long id, String apiKey) {
+        ResponseEntity<UserInfoResponse> yaUserResponse = remoteClient.getYaUser(id, apiKey);
+
+        if (yaUserResponse.getStatusCode().is2xxSuccessful()) {
+            return yaUserResponse.getBody();
+        } else {
+            String response = yaUserResponse.toString();
+
+            throw new CommonBackendException(response, HttpStatus.valueOf(yaUserResponse.getStatusCode().value()));
+        }
     }
 }

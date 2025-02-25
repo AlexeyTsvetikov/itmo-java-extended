@@ -7,14 +7,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public interface UserService { // для межмодульной архитектуры
 
     UserInfoResponse addUser(UserInfoRequest request);
 
-    UserInfoResponse getUser(Long id);
+    UserInfoResponse getUser(String apiKey, Long id);
 
     User getUserFromDB(Long id);
 
@@ -27,4 +25,6 @@ public interface UserService { // для межмодульной архитек
     User updateCarList(User userFromDB);
 
     void invalidateSessions();
+
+    UserInfoResponse getYaUser(Long id, String apiKey);
 }
